@@ -1,5 +1,54 @@
-﻿<h3>CategoriasListPage</h3>
+﻿@using ECommerceWeb.Common
+@page "/categorias/list"
+
+<h3>Lista de Categorías</h3>
+
+<div>
+    <button type="button" class="btn btn-primary mb-3" @onclick="MostrarLista">Mostrar Lista</button>
+</div>
+
+@if (MostrarDatos)
+{
+    <table class="table">
+        <thead>
+            <tr class="table-primary">
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>Despcripción</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var categoria in Categorias)
+            {
+                <tr>
+                    <td>@categoria.Id</td>
+                    <td>@categoria.Nombre</td>
+                    <td>@categoria.Descripcion</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
+    public ICollection<CategoriaDto> Categorias { get; set; } = new List<CategoriaDto>();
 
+    public bool MostrarDatos { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500);
+
+        Categorias = new List<CategoriaDto>
+        {
+            new CategoriaDto {Id=1, Nombre="Electrónica", Descripcion="Dispositivos electrónicos y gadgets." },
+            new CategoriaDto {Id=2, Nombre="Ropa", Descripcion="Moda y accesorios." },
+            new CategoriaDto {Id=3, Nombre="Hogar", Descripcion="Artículos para el hogar y decoración." }
+        };
+    }
+
+    private void MostrarLista()
+    {
+        MostrarDatos = !MostrarDatos;
+    }
 }
