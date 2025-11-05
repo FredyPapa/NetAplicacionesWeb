@@ -1,5 +1,6 @@
 ﻿@using ECommerceWeb.Common
 @page "/categorias/list"
+@inject HttpClient HttpClient
 
 <h3>Lista de Categorías</h3>
 
@@ -9,25 +10,32 @@
 
 @if (MostrarDatos)
 {
-    <table class="table">
-        <thead>
-            <tr class="table-primary">
-                <th>Id</th>
-                <th>Nombre</th>
-                <th>Despcripción</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach(var categoria in Categorias)
-            {
-                <tr>
-                    <td>@categoria.Id</td>
-                    <td>@categoria.Nombre</td>
-                    <td>@categoria.Descripcion</td>
+    @if (Categorias.Count == 0)
+    {
+        <p class="alert alert-warning">No hay categorías disponibles.</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr class="table-primary">
+                    <th>Id</th>
+                    <th>Nombre</th>
+                    <th>Despcripción</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach(var categoria in Categorias)
+                {
+                    <tr>
+                        <td>@categoria.Id</td>
+                        <td>@categoria.Nombre</td>
+                        <td>@categoria.Descripcion</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 }
 
 @code {
@@ -35,20 +43,22 @@
 
     public bool MostrarDatos { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    private async Task LoadData()
     {
-        await Task.Delay(500);
-
-        Categorias = new List<CategoriaDto>
+        var response = await HttpClient.GetAsync("api/categorias");
+        if (response.IsSuccessStatusCode)
         {
-            new CategoriaDto {Id=1, Nombre="Electrónica", Descripcion="Dispositivos electrónicos y gadgets." },
-            new CategoriaDto {Id=2, Nombre="Ropa", Descripcion="Moda y accesorios." },
-            new CategoriaDto {Id=3, Nombre="Hogar", Descripcion="Artículos para el hogar y decoración." }
-        };
+            Categorias = await response.Content.ReadFromJsonAsync<ICollection<CategoriaDto>>()
+            ?? new List<CategoriaDto>();
+        }
     }
 
-    private void MostrarLista()
+    private async Task MostrarLista()
     {
         MostrarDatos = !MostrarDatos;
+        if (MostrarDatos)
+        {
+            await LoadData();
+        }
     }
 }
