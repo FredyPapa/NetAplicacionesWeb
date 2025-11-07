@@ -1,0 +1,31 @@
+﻿@page "/categoria/new"
+@using ECommerceWeb.Common
+
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+<h3>Nueva Categoría</h3>
+
+<CategoriaEditComponent Model="Model" OnGuardar="OnSave" />
+
+@code {
+    private CategoriaDto Model { get; set; } = new CategoriaDto();
+
+    private async Task OnSave()
+    {
+        //var HttpResponseMessage? response = await HttpClient.PostAsJsonAsync("api/categorias", Model);
+        var response = await HttpClient.PostAsJsonAsync("api/categorias", Model);
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("categorias/list");
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            //var string? errorContent = await response.Content.ReadAsStringAsync();
+            var errorContent = await response.Content.ReadAsStringAsync();
+            //Manejamos el error
+            Console.WriteLine($"Error al guardar la categoría: {errorContent}");
+        }
+    }
+}

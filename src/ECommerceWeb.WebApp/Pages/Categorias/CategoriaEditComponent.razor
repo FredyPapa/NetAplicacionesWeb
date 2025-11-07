@@ -1,0 +1,26 @@
+﻿@using ECommerceWeb.Common
+
+<EditForm Model="Model" OnValidSubmit="OnGuardar">
+    <DataAnnotationsValidator/>
+    <div class="col-6">
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre</label>
+            <InputText id="nombre" class="form-control" @bind-Value="Model.Nombre"/>
+            <ValidationMessage For="@(()=>Model.Nombre)"/>
+        </div>
+        <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <InputTextArea id="descripcion" class="form-control" @bind-Value="Model.Descripcion" />
+            <ValidationMessage For="@(() => Model.Descripcion)" />
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public CategoriaDto Model { get; set; } = new CategoriaDto();
+
+    [Parameter]
+    public EventCallback OnGuardar { get; set; }
+}

@@ -1,0 +1,38 @@
+﻿@page "/categorias/edit/{Id:int}"
+@using ECommerceWeb.Common
+
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+<h3>Editar Categoría</h3>
+
+<CategoriaEditComponent Model="categoria" OnGuardar="OnGuardar"/>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private CategoriaDto categoria = new CategoriaDto();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var response = await HttpClient.GetAsync($"api/categorias/{Id}");
+        if (response.IsSuccessStatusCode)
+        {
+            var result = await response.Content.ReadFromJsonAsync<CategoriaDto>();
+            if(result is not null)
+            {
+                categoria = result;
+            }
+        }
+    }
+
+    private async Task OnGuardar()
+    {
+        var response = await HttpClient.PutAsJsonAsync($"api/categorias/{Id}",categoria);
+        if (response.IsSuccessStatusCode)
+        {
+            //Operación realizada con éxito
+        }
+    }
+}

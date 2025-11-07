@@ -23,5 +23,25 @@ namespace ECommerceWeb.WebApi.Repositories.Services
             await _context.Set<TEntity>().AddAsync(entity);
             return await _context.SaveChangesAsync();
         }
+
+        public async Task<TEntity?> GetByIdAsync(int id)
+        {
+            return await _context.Set<TEntity>().FindAsync(id);
+        }
+
+        public async Task UpdateAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var entity = await _context.Set<TEntity>().FindAsync(id);
+            if (entity != null)
+            {
+                _context.Set<TEntity>().Remove(entity);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

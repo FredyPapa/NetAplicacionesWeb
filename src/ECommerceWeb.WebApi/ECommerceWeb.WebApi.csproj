@@ -21,8 +21,4 @@
     <ProjectReference Include="..\ECommerceWeb.WebApp\ECommerceWeb.WebApp.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Repositories\Services\" />
-  </ItemGroup>
-
 </Project>

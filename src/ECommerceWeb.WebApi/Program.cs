@@ -1,5 +1,6 @@
 using ECommerceWeb.WebApi.DataAccess;
 using ECommerceWeb.WebApi.Repositories.Interfaces;
+using ECommerceWeb.WebApi.Repositories.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +16,7 @@ builder.Services.AddDbContext<ECommerceDbContext>(options =>
 });
 
 // Registro en el DI Container la dependencia del ICategoriaRepository
-builder.Services.AddScoped<ICategoriaRepository,ICategoriaRepository>();
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 
 var app = builder.Build();
 

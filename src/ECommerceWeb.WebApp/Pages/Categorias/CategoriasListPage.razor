@@ -1,0 +1,69 @@
+﻿@using ECommerceWeb.Common
+@page "/categorias/list"
+@inject HttpClient HttpClient
+
+<h3>Lista de Categorías</h3>
+
+<div>
+    <button type="button" class="btn btn-primary mb-3" @onclick="LoadData">Cargar Lista</button>
+    <a href="/categoria/new" class="btn btn-success mb-3">Nueva Categoría</a>
+</div>
+
+
+@if (Categorias.Count == 0)
+{
+    <p class="alert alert-warning">No hay datos para mostrar</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr class="table-primary">
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>Despcripción</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var categoria in Categorias)
+            {
+                <tr>
+                    <td>@categoria.Id</td>
+                    <td>@categoria.Nombre</td>
+                    <td>@categoria.Descripcion</td>
+                    <td>
+                        <a href="/categorias/edit/@categoria.Id" class="btn btn-warning btn-sm">Editar</a>
+                        <button class="btn btn-danger btn-sm" @onclick="()=>DeleteCategoria(categoria.Id)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    public ICollection<CategoriaDto> Categorias { get; set; } = new List<CategoriaDto>();
+
+    private async Task LoadData()
+    {
+        //var HttpResponseMessage? response = await HttpClient.GetAsync("api/categorias");
+        var response = await HttpClient.GetAsync("api/categorias");
+        if (response.IsSuccessStatusCode)
+        {
+            Categorias = await response.Content.ReadFromJsonAsync<ICollection<CategoriaDto>>()
+            ?? new List<CategoriaDto>();
+        }
+    }
+
+    private async Task DeleteCategoria(int id)
+    {
+        var response = await HttpClient.DeleteAsync($"api/categorias/{id}");
+        if (response.IsSuccessStatusCode)
+        {
+            //Refrescar la lista luego de eliminar
+            await LoadData();
+        }
+    }
+}
