@@ -32,7 +32,7 @@
         var response = await HttpClient.PutAsJsonAsync($"api/categorias/{Id}",categoria);
         if (response.IsSuccessStatusCode)
         {
-            //Operación realizada con éxito
+            NavigationManager.NavigateTo("/categorias/List");
         }
     }
 }
