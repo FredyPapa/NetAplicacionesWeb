@@ -1,0 +1,53 @@
+﻿@page "/productos/edit/{Id:int}"
+@using ECommerceWeb.Common
+@using ECommerceWeb.Common.Request
+@using ECommerceWeb.Common.Response
+
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+<h3>Editar Producto</h3>
+
+<ProductoEditComponent Model="producto" OnGuardar="OnGuardar" Marcas="_marcas" Categorias="_categorias"/>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private ProductoDtoRequest producto = new ProductoDtoRequest();
+
+    private ICollection<CategoriaDto> _categorias = new List<CategoriaDto>();
+
+    private ICollection<MarcaDtoResponse> _marcas = new List<MarcaDtoResponse>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var response = await HttpClient.GetAsync($"api/productos/{Id}");
+        if (response.IsSuccessStatusCode)
+        {
+            var result = await response.Content.ReadFromJsonAsync<ProductoDtoRequest>();
+            if(result is not null)
+            {
+                producto = result;
+            }
+        }
+    }
+
+    private async Task OnGuardar()
+    {
+        var response = await HttpClient.PutAsJsonAsync($"api/productos/{Id}",producto);
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/productos/List");
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var responseCategorias = await HttpClient.GetFromJsonAsync<ICollection<CategoriaDto>>("api/categorias");
+        _categorias = responseCategorias ?? new List<CategoriaDto>();
+
+        var responseMarcas = await HttpClient.GetFromJsonAsync<ICollection<MarcaDtoResponse>>("api/marcas");
+        _marcas = responseMarcas ?? new List<MarcaDtoResponse>();
+    }
+}

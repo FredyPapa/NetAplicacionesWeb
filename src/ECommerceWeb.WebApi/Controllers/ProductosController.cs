@@ -20,7 +20,8 @@ namespace ECommerceWeb.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetProductos()
         {
-            var productos = await _repository.ListAsync();
+            //var productos = await _repository.ListAsync();
+            var productos = await _repository.GetAllProductsAsync();
             return Ok(productos);
         }
 
@@ -49,6 +50,39 @@ namespace ECommerceWeb.WebApi.Controllers
             };
             await _repository.AddAsync(producto);
             return CreatedAtAction(nameof(GetProducto), new {id = producto.Id}, producto);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult> UpdateProducto(int id, [FromBody] ProductoDtoRequest request)
+        {
+            var producto = await _repository.GetByIdAsync(id);
+            if (producto == null)
+            {
+                return NotFound();
+            }
+
+            producto.CategoriaId = request.CategoriaId;
+            producto.MarcaId = request.MarcaId;
+            producto.Nombre = request.Nombre;
+            producto.Descripcion = request.Descripcion;
+            producto.PrecioUnitario = request.PrecioUnitario;
+            producto.UrlImagen = request.UrlImagen;
+
+            await _repository.UpdateAsync();
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteProducto(int id)
+        {
+            var producto = await _repository.GetByIdAsync(id);
+            if (producto == null)
+            {
+                return NotFound();
+            }
+
+            await _repository.DeleteAsync(producto.Id);
+            return NoContent();
         }
     }
 }

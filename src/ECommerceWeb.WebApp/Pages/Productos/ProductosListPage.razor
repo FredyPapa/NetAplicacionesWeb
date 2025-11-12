@@ -1,7 +1,9 @@
-﻿@using ECommerceWeb.Common
+﻿@using CurrieTechnologies.Razor.SweetAlert2
+@using ECommerceWeb.Common
 @using ECommerceWeb.Common.Response
 @page "/productos/list"
 @inject HttpClient HttpClient
+@inject SweetAlertService Swal
 
 <h3 class="mb-3">Lista de Productos</h3>
 
@@ -65,6 +67,19 @@ else
 
     private async Task DeleteProducto(int id)
     {
+        var swalResult = await Swal.FireAsync(new SweetAlertOptions
+        {
+            Title = "¿Estás seguro?",
+            Text = "Esta acción no se puede deshacer",
+            Icon = SweetAlertIcon.Warning,
+            ShowCancelButton = true,
+            ConfirmButtonText = "Sí, eliminar",
+            CancelButtonText = "Cancelar"
+        });
+
+        if (!swalResult.IsConfirmed)
+            return;
+
         var response = await HttpClient.DeleteAsync($"api/productos/{id}");
         if (response.IsSuccessStatusCode)
         {
