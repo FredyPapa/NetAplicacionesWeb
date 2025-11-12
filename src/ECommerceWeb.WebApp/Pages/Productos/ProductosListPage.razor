@@ -1,0 +1,75 @@
+﻿@using ECommerceWeb.Common
+@using ECommerceWeb.Common.Response
+@page "/productos/list"
+@inject HttpClient HttpClient
+
+<h3 class="mb-3">Lista de Productos</h3>
+
+<div class="mb-3">
+    <button type="button" class="btn btn-primary mb-3" @onclick="LoadData"><i class="bi bi-arrow-clockwise me-1"></i>Cargar Lista</button>
+    <a href="/productos/new" class="btn btn-success mb-3"><i class="bi bi-plus-circle me-1"></i>Nuevo Producto</a>
+</div>
+
+
+@if (Productos.Count == 0)
+{
+    <p class="alert alert-warning">No hay datos para mostrar</p>
+}
+else
+{
+    <table class="table table-hover table-striped">
+        <thead>
+            <tr class="table-primary">
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>Despcripción</th>
+                <th>Precio Unitario</th>
+                <th>Marca</th>
+                <th>Categoría</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var producto in Productos)
+            {
+                <tr>
+                    <td>@producto.Id</td>
+                    <td>@producto.Nombre</td>
+                    <td>@producto.Descripcion</td>
+                    <td>@producto.PrecioUnitario</td>
+                    <td>@producto.Marca</td>
+                    <td>@producto.Categoria</td>
+                    <td>
+                        <a href="/productos/edit/@producto.Id" class="btn btn-warning btn-sm"><i class="bi bi-pencil me-1"></i></a>
+                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteProducto(producto.Id)"><i class="bi bi-trash me-1"></i></button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    public ICollection<ProductoDtoResponse> Productos { get; set; } = new List<ProductoDtoResponse>();
+
+    private async Task LoadData()
+    {
+        var response = await HttpClient.GetAsync("api/productos");
+        if (response.IsSuccessStatusCode)
+        {
+            Productos = await response.Content.ReadFromJsonAsync<ICollection<ProductoDtoResponse>>()
+            ?? new List<ProductoDtoResponse>();
+        }
+    }
+
+    private async Task DeleteProducto(int id)
+    {
+        var response = await HttpClient.DeleteAsync($"api/productos/{id}");
+        if (response.IsSuccessStatusCode)
+        {
+            //Refrescar la lista luego de eliminar
+            await LoadData();
+        }
+    }
+}

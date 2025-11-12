@@ -1,0 +1,45 @@
+﻿@page "/productos/new"
+@using ECommerceWeb.Common
+@using ECommerceWeb.Common.Request
+@using ECommerceWeb.Common.Response
+
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+<h3>Nuevo Producto</h3>
+
+<ProductoEditComponent Model="Model" OnGuardar="OnSave" Categorias="_categorias" Marcas="_marcas" />
+
+@code {
+    private ProductoDtoRequest Model { get; set; } = new ProductoDtoRequest();
+
+    private ICollection<CategoriaDto> _categorias = new List<CategoriaDto>();
+
+    private ICollection<MarcaDtoResponse> _marcas = new List<MarcaDtoResponse>();
+
+    private async Task OnSave()
+    {
+        //var HttpResponseMessage? response = await HttpClient.PostAsJsonAsync("api/categorias", Model);
+        var response = await HttpClient.PostAsJsonAsync("api/productos", Model);
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("productos/list");
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            //Manejamos el error
+            Console.WriteLine($"Error al guardar el producto: {errorContent}");
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var responseCategorias = await HttpClient.GetFromJsonAsync<ICollection<CategoriaDto>>("api/categorias");
+        _categorias = responseCategorias ?? new List<CategoriaDto>();
+
+        var responseMarcas = await HttpClient.GetFromJsonAsync<ICollection<MarcaDtoResponse>>("api/marcas");
+        _marcas = responseMarcas ?? new List<MarcaDtoResponse>();
+    }
+}

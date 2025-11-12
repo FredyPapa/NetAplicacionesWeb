@@ -17,6 +17,8 @@ builder.Services.AddDbContext<ECommerceDbContext>(options =>
 
 // Registro en el DI Container la dependencia del ICategoriaRepository
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+builder.Services.AddScoped<IMarcaRepository, MarcaRepository>();
+builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
 
 var app = builder.Build();
 
@@ -33,5 +35,13 @@ app.UseStaticFiles();
 app.MapFallbackToFile("index.html");
 
 app.MapControllers();
+
+//Minimal API
+app.MapGet("/api/marcas",async(IMarcaRepository marcaRepository) =>
+{
+    var marcas = await marcaRepository.ListAsync();
+    return Results.Ok(marcas);
+});
+
 app.Run();
 
