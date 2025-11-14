@@ -10,5 +10,8 @@ namespace ECommerceWeb.Common.Request
         public string Descripcion { get; set; } = null!;
         public float PrecioUnitario { get; set; }
         public string? UrlImagen { get; set; }
+
+        public string? Base64Imagen { get; set; }
+        public string? NombreArchivo { get; set; }
     }
 }

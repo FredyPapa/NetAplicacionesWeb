@@ -3,6 +3,7 @@ using ECommerceWeb.WebApi.Repositories.Interfaces;
 using ECommerceWeb.Common.Request;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ECommerceWeb.WebApi.Services;
 
 namespace ECommerceWeb.WebApi.Controllers
 {
@@ -11,10 +12,12 @@ namespace ECommerceWeb.WebApi.Controllers
     public class ProductosController : ControllerBase
     {
         private readonly IProductoRepository _repository;
+        private readonly IFileUploader _fileUploader;
 
-        public ProductosController(IProductoRepository repository)
+        public ProductosController(IProductoRepository repository,IFileUploader fileUploader)
         {
             _repository = repository;
+            _fileUploader = fileUploader;
         }
 
         [HttpGet]
@@ -48,6 +51,9 @@ namespace ECommerceWeb.WebApi.Controllers
                 PrecioUnitario = request.PrecioUnitario,
                 UrlImagen = request.UrlImagen
             };
+
+            producto.UrlImagen = await _fileUploader.UploadFileAsync(request.Base64Imagen, request.NombreArchivo);
+
             await _repository.AddAsync(producto);
             return CreatedAtAction(nameof(GetProducto), new {id = producto.Id}, producto);
         }
@@ -67,6 +73,11 @@ namespace ECommerceWeb.WebApi.Controllers
             producto.Descripcion = request.Descripcion;
             producto.PrecioUnitario = request.PrecioUnitario;
             producto.UrlImagen = request.UrlImagen;
+
+            if(!string.IsNullOrWhiteSpace(request.Base64Imagen) && !string.IsNullOrWhiteSpace(request.NombreArchivo))
+            {
+                producto.UrlImagen = await _fileUploader.UploadFileAsync(request.Base64Imagen, request.NombreArchivo);
+            }
 
             await _repository.UpdateAsync();
             return NoContent();

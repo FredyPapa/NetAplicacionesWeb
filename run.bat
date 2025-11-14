@@ -1,0 +1,1 @@
+dotnet run --project src/ECommerceWeb.WebApi --launch-profile https

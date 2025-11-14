@@ -28,6 +28,15 @@ namespace ECommerceWeb.WebApi.DataAccess
             modelBuilder.Entity<Producto>()
                 .Property(p => p.UrlImagen)
                 .HasMaxLength(500);
+
+            //Data Seeding
+            modelBuilder.Entity<Marca>()
+                .HasData(new List<Marca>
+                {
+                    new () {Id=11,Nombre="Samsung 2" },
+                    new () {Id=12,Nombre="Apple 2" },
+                    new () {Id=13,Nombre="Xiaomi 2" }
+                });
         }
 
     }
