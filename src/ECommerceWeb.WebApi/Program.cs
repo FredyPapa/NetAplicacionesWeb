@@ -1,6 +1,7 @@
 using ECommerceWeb.WebApi.DataAccess;
 using ECommerceWeb.WebApi.Repositories.Interfaces;
 using ECommerceWeb.WebApi.Repositories.Services;
+using ECommerceWeb.WebApi.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,7 @@ builder.Services.AddDbContext<ECommerceDbContext>(options =>
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IMarcaRepository, MarcaRepository>();
 builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
+builder.Services.AddScoped<IFileUploader, FileUploader>();
 
 var app = builder.Build();
 

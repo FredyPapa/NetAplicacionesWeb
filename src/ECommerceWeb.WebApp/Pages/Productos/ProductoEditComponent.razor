@@ -6,66 +6,80 @@
 
 <EditForm Model="Model" OnSubmit="OnGuardar">
     <DataAnnotationsValidator />
-    <ValidationSummary/>
-    
-    <div class="col-6">
-        
-        <div class="mb-3">
-            <label for="nombre" class="form-label">Nombre</label>
-            <InputText id="nombre" class="form-control" @bind-Value="Model.Nombre" />
-            <ValidationMessage For="@(() => Model.Nombre)" />
-        </div>
-        
-        <div class="mb-3">
-            <label for="descripcion" class="form-label">Descripción</label>
-            <InputTextArea id="descripcion" class="form-control" @bind-Value="Model.Descripcion" />
-            <ValidationMessage For="@(() => Model.Descripcion)" />
+
+    <div class="row">
+        <div class="col-6">
+
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <InputText id="nombre" class="form-control" @bind-Value="Model.Nombre" />
+                <ValidationMessage For="@(() => Model.Nombre)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="descripcion" class="form-label">Descripción</label>
+                <InputTextArea id="descripcion" class="form-control" @bind-Value="Model.Descripcion" />
+                <ValidationMessage For="@(() => Model.Descripcion)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="precioUnitario" class="form-label">Precio Unitario</label>
+                <InputNumber id="precioUnitario" class="form-control" @bind-Value="Model.PrecioUnitario" />
+                <ValidationMessage For="@(() => Model.PrecioUnitario)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="marca" class="form-label">Marca</label>
+                <InputSelect id="marca" class="form-select" @bind-Value="Model.MarcaId">
+                    <option value="0">Seleccione una marca</option>
+                    @foreach (var marca in Marcas)
+                    {
+                        <option value="@marca.Id">@marca.Nombre</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="mb-3">
+                <label for="categoria" class="form-label">Categoría</label>
+                <InputSelect id="categoria" class="form-select" @bind-Value="Model.CategoriaId">
+                    <option value="0">Seleccione una categoría</option>
+                    @foreach (var categoria in Categorias)
+                    {
+                        <option value="@categoria.Id">@categoria.Nombre</option>
+                    }
+                </InputSelect>
+            </div>
         </div>
 
-        <div class="mb-3">
-            <label for="precioUnitario" class="form-label">Precio Unitario</label>
-            <InputNumber id="precioUnitario" class="form-control" @bind-Value="Model.PrecioUnitario" />
-            <ValidationMessage For="@(() => Model.PrecioUnitario)" />
+        <div class="col-6">
+            <div class="card">
+                <div class="card-body">
+                    @if (Model.Base64Imagen is not null)
+                    {
+                        <div style="margin:10px">
+                            <img src="data:image/jpeg;base64, @Model.Base64Imagen" alt="@Model.Nombre" style="width:400px" />
+                        </div>
+                    }
+                    else
+                    {
+                        <img src="@Model.UrlImagen" alt="@Model.Nombre" style="width:400px" />
+                    }
+                </div>
+                <div class="card-footer">
+                    <InputFile accpet="image/jpeg, image/png, image/webp" style="display:none" id="file" OnChange="OnFileUploaded" />
+                    <label for="file" class="btn btn-secondary"><i class="bi bi-camera me-1"></i>Imagen</label>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div class="mb-3">
-            <label for="marca" class="form-label">Marca</label>
-            <InputSelect id="marca" class="form-select" @bind-Value="Model.MarcaId">
-                <option value="0">Seleccione una marca</option>
-                @foreach(var marca in Marcas)
-                {
-                    <option value="@marca.Id">@marca.Nombre</option>
-                }
-            </InputSelect>
-        </div>
-
-        <div class="mb-3">
-            <label for="categoria" class="form-label">Categoría</label>
-            <InputSelect id="categoria" class="form-select" @bind-Value="Model.CategoriaId">
-                <option value="0">Seleccione una categoría</option>
-                @foreach (var categoria in Categorias)
-                {
-                    <option value="@categoria.Id">@categoria.Nombre</option>
-                }
-            </InputSelect>
-        </div>
+    <div class="row">
         <div class="d-flex gap-1 align-items-baseline">
             <button type="submit" class="btn btn-primary"><i class="bi bi-floppy me-1"></i>Guardar</button>
             <a href="productos/list" class="btn btn-secondary mt-1"><i class="bi bi-arrow-left me-1"></i>Volver al listado</a>
         </div>
     </div>
+
+    <ValidationSummary />
 </EditForm>
 
-@code {
-    [Parameter]
-    public ProductoDtoRequest Model { get; set; } = new ProductoDtoRequest();
-
-    [Parameter]
-    public ICollection<MarcaDtoResponse> Marcas { get; set; } = new List<MarcaDtoResponse>();
-
-    [Parameter]
-    public ICollection<CategoriaDto> Categorias { get; set; } = new List<CategoriaDto>();
-
-    [Parameter]
-    public EventCallback OnGuardar { get; set; }
-}

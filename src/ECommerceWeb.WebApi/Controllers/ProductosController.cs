@@ -14,7 +14,7 @@ namespace ECommerceWeb.WebApi.Controllers
         private readonly IProductoRepository _repository;
         private readonly IFileUploader _fileUploader;
 
-        public ProductosController(IProductoRepository repository,IFileUploader fileUploader)
+        public ProductosController(IProductoRepository repository, IFileUploader fileUploader)
         {
             _repository = repository;
             _fileUploader = fileUploader;
@@ -55,7 +55,7 @@ namespace ECommerceWeb.WebApi.Controllers
             producto.UrlImagen = await _fileUploader.UploadFileAsync(request.Base64Imagen, request.NombreArchivo);
 
             await _repository.AddAsync(producto);
-            return CreatedAtAction(nameof(GetProducto), new {id = producto.Id}, producto);
+            return CreatedAtAction(nameof(GetProducto), new { id = producto.Id }, producto);
         }
 
         [HttpPut("{id}")]
@@ -74,7 +74,7 @@ namespace ECommerceWeb.WebApi.Controllers
             producto.PrecioUnitario = request.PrecioUnitario;
             producto.UrlImagen = request.UrlImagen;
 
-            if(!string.IsNullOrWhiteSpace(request.Base64Imagen) && !string.IsNullOrWhiteSpace(request.NombreArchivo))
+            if (!string.IsNullOrWhiteSpace(request.Base64Imagen) && !string.IsNullOrWhiteSpace(request.NombreArchivo))
             {
                 producto.UrlImagen = await _fileUploader.UploadFileAsync(request.Base64Imagen, request.NombreArchivo);
             }

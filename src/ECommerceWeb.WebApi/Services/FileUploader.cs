@@ -14,7 +14,7 @@ namespace ECommerceWeb.WebApi.Services
         public async Task<string> UploadFileAsync(string? base64Imagen, string? archivo)
         {
             if (string.IsNullOrWhiteSpace(base64Imagen) || string.IsNullOrWhiteSpace(archivo))
-            { 
+            {
                 return string.Empty;
             }
 
@@ -31,10 +31,11 @@ namespace ECommerceWeb.WebApi.Services
                 var rutaCompleta = Path.Combine(carpeta, archivo);
 
                 await using var fileStream = new FileStream(rutaCompleta, FileMode.Create);
-                await fileStream.WriteAsync(bytes,0,bytes.Length);
+                await fileStream.WriteAsync(bytes, 0, bytes.Length);
 
                 return $"/uploads/{archivo}"; // Ruta relativa del archivo
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogCritical(ex, "Error al subir el archivo {archivo}", archivo);
                 return string.Empty;
