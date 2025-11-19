@@ -1,6 +1,7 @@
 ﻿using ECommerceWeb.WebApi.DataAccess;
 using ECommerceWeb.WebApi.Entities;
 using ECommerceWeb.WebApi.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ namespace ECommerceWeb.WebApi.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetCategorias()
         {
             try
