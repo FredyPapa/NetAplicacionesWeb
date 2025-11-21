@@ -3,6 +3,7 @@ using ECommerceWeb.WebApi.Repositories.Interfaces;
 using ECommerceWeb.WebApi.Repositories.Services;
 using ECommerceWeb.WebApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -18,6 +19,21 @@ builder.Services.AddDbContext<ECommerceDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("ECommerceDB"));
 });
+
+//Configuramos ASP.NET Identity
+builder.Services.AddIdentity<ECommerceUserIdentity, IdentityRole>(options =>
+{
+    options.Password.RequiredLength = 6;
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+
+    options.User.RequireUniqueEmail = true;
+
+})
+    .AddEntityFrameworkStores<ECommerceDbContext>()
+    .AddDefaultTokenProviders();
 
 // Registro en el DI Container la dependencia del ICategoriaRepository
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
@@ -90,6 +106,12 @@ app.MapGet("/api/marcas",async(IMarcaRepository marcaRepository) =>
     var marcas = await marcaRepository.ListAsync();
     return Results.Ok(marcas);
 });
+
+using (var scope = app.Services.CreateAsyncScope())
+{
+    //Crea el usuario admin por default
+    await UserDataSeeder.Seed(scope.ServiceProvider);
+}
 
 app.Run();
 

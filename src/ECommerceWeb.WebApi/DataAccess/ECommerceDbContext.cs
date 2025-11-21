@@ -1,9 +1,10 @@
 ﻿using ECommerceWeb.WebApi.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace ECommerceWeb.WebApi.DataAccess
 {
-    public class ECommerceDbContext : DbContext
+    public class ECommerceDbContext : IdentityDbContext<ECommerceUserIdentity>     //DbContext
     {
         public ECommerceDbContext(DbContextOptions<ECommerceDbContext> options) : base(options)
         {

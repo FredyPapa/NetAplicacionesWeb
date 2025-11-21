@@ -11,5 +11,10 @@ namespace ECommerceWeb.Common
         public const string CampoRequerido = "El campo {0} es requerido.";
 
         public const string EmailInvalido = "El formato de email es inválido.";
+
+
+        //Roles
+        public const string RolAdministrador = "Administrador";
+        public const string RolCliente = "Cliente";
     }
 }
