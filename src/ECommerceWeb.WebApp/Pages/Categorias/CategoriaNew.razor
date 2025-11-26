@@ -3,6 +3,7 @@
 
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
+@attribute [Authorize(Roles = Constantes.RolAdministrador)]
 
 <h3>Nueva Categoría</h3>
 

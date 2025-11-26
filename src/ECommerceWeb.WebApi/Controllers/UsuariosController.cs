@@ -24,6 +24,18 @@ namespace ECommerceWeb.WebApi.Controllers
             return response.Success ? Ok(response) : Unauthorized(response);
         }
 
-
+        [HttpPost]
+        public async Task<IActionResult> Register([FromBody] RegisterUserDto request)
+        {
+            var response = await _service.RegisterAsync(request);
+            if (response.Success)
+            {
+                return Ok(response);
+            }
+            else
+            {
+                return BadRequest(response);
+            }
+        }
     }
 }

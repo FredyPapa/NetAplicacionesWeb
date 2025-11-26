@@ -6,6 +6,8 @@
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 
+@attribute [Authorize]
+
 <h3>Nuevo Producto</h3>
 
 <ProductoEditComponent Model="Model" OnGuardar="OnSave" Categorias="_categorias" Marcas="_marcas" />

@@ -1,4 +1,6 @@
-﻿using ECommerceWeb.Common.Request;
+﻿using Azure;
+using ECommerceWeb.Common;
+using ECommerceWeb.Common.Request;
 using ECommerceWeb.Common.Response;
 using ECommerceWeb.WebApi.DataAccess;
 using Microsoft.AspNetCore.Identity;
@@ -84,6 +86,42 @@ namespace ECommerceWeb.WebApi.Services
                 response.ErrorMessage = ex.Message;
             }
 
+            return response;
+        }
+
+        public async Task<BaseResponse> RegisterAsync(RegisterUserDto request)
+        {
+            var response = new BaseResponse();
+            try
+            {
+                var identity = new ECommerceUserIdentity()
+                {
+                    UserName = request.Usuario,
+                    NombreCompleto = request.NombreCompleto,
+                    Email = request.Email,
+                    FechaNacimiento = request.FechaNacimiento,
+                    Direccion = request.Direccion
+                };
+
+                var result = await _userManager.CreateAsync(identity, request.Password);
+                if (result.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(identity, Constantes.RolCliente);
+                    response.Success = true;
+                }
+                else
+                {
+                    response.Success = false;
+                    response.ErrorMessage = string.Join("; ", result.Errors.Select(e=>e.Description));
+                }
+
+                response.Success = result.Succeeded;
+            }
+            catch (Exception ex)
+            {
+                response.ErrorMessage = "No se pudo registrar al usaurio";
+                _logger.LogCritical(ex, "Error registrando al usuario {UserName}",request.Usuario);
+            }
             return response;
         }
     }

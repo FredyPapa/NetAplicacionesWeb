@@ -1,4 +1,4 @@
-﻿@page "/login"
+﻿@page "/account/login"
 
 @using Blazored.Toast.Services
 @using ECommerceWeb.Common.Request
@@ -44,7 +44,8 @@
 </div>
 
 @code {
-    private LoginDtoRequest LoginDtoRequest { get; set; } = new LoginDtoRequest();
+    private LoginDtoRequest Model { get; set; } = new();
+
     private bool IsLoading { get; set; }
 
     private async Task ValidLogin()
@@ -52,20 +53,20 @@
         try
         {
             IsLoading = true;
-            var response = await HttpClient.PostAsJsonAsync("api/Usuarios/Login", LoginDtoRequest);
+            var response = await HttpClient.PostAsJsonAsync("api/Usuarios/Login", Model);
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<LoginDtoResponse>();
-                if(AuthStateProvider is AuthenticationService customAuthStateProvider)
+                if (AuthStateProvider is AuthenticationService customAuthStateProvider)
                 {
                     await customAuthStateProvider.Autenticar(result);
-                    NavigationManager.NavigateTo("");
+                    NavigationManager.NavigateTo("/");
                 }
             }
             else
             {
                 var error = await response.Content.ReadFromJsonAsync<LoginDtoResponse>();
-                //Mensaje de error
+                // Manejar el error, mostrar mensaje al usuario, etc.
                 ToastService.ShowError(error?.ErrorMessage ?? "Error desconocido");
             }
         }

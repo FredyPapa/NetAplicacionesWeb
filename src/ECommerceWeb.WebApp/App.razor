@@ -8,7 +8,7 @@
                     @{
                         if(context.User.Identity!.IsAuthenticated == false)
                         {
-                            NavigationManager.NavigateTo("/login");
+                            NavigationManager.NavigateTo("/account/login");
                             return;
                         }
                     }
