@@ -1,8 +1,11 @@
-﻿@using CurrieTechnologies.Razor.SweetAlert2
+﻿@using Blazored.Toast.Services
+@using CurrieTechnologies.Razor.SweetAlert2
 @using ECommerceWeb.Common
 @page "/categorias/list"
 @inject HttpClient HttpClient
 @inject SweetAlertService Swal
+@inject IToastService ToastService
+@attribute [Authorize]
 
 <h3 class="mb-3">Lista de Categorías</h3>
 
@@ -28,7 +31,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach(var categoria in Categorias)
+            @foreach (var categoria in Categorias)
             {
                 <tr>
                     <td>@categoria.Id</td>
@@ -45,40 +48,3 @@ else
 }
 
 
-@code {
-    public ICollection<CategoriaDto> Categorias { get; set; } = new List<CategoriaDto>();
-
-    private async Task LoadData()
-    {
-        //var HttpResponseMessage? response = await HttpClient.GetAsync("api/categorias");
-        var response = await HttpClient.GetAsync("api/categorias");
-        if (response.IsSuccessStatusCode)
-        {
-            Categorias = await response.Content.ReadFromJsonAsync<ICollection<CategoriaDto>>()
-            ?? new List<CategoriaDto>();
-        }
-    }
-
-    private async Task DeleteCategoria(int id)
-    {
-        var swalResult = await Swal.FireAsync(new SweetAlertOptions
-        {
-            Title = "¿Estás seguro?",
-            Text = "Esta acción no se puede deshacer",
-            Icon = SweetAlertIcon.Warning,
-            ShowCancelButton = true,
-            ConfirmButtonText = "Sí, eliminar",
-            CancelButtonText = "Cancelar"
-        });
-
-        if (!swalResult.IsConfirmed)
-            return;
-
-        var response = await HttpClient.DeleteAsync($"api/categorias/{id}");
-        if (response.IsSuccessStatusCode)
-        {
-            //Refrescar la lista luego de eliminar
-            await LoadData();
-        }
-    }
-}

@@ -1,9 +1,11 @@
-﻿@using CurrieTechnologies.Razor.SweetAlert2
+﻿@using Blazored.Toast.Services
+@using CurrieTechnologies.Razor.SweetAlert2
 @using ECommerceWeb.Common
 @using ECommerceWeb.Common.Response
 @page "/productos/list"
 @inject HttpClient HttpClient
 @inject SweetAlertService Swal
+@inject IToastService ToastService
 
 <h3 class="mb-3">Lista de Productos</h3>
 
@@ -55,13 +57,25 @@ else
 @code {
     public ICollection<ProductoDtoResponse> Productos { get; set; } = new List<ProductoDtoResponse>();
 
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
     private async Task LoadData()
     {
-        var response = await HttpClient.GetAsync("api/productos");
-        if (response.IsSuccessStatusCode)
+        try
         {
-            Productos = await response.Content.ReadFromJsonAsync<ICollection<ProductoDtoResponse>>()
-            ?? new List<ProductoDtoResponse>();
+            var response = await HttpClient.GetAsync("api/productos");
+            if (response.IsSuccessStatusCode)
+            {
+                Productos = await response.Content.ReadFromJsonAsync<ICollection<ProductoDtoResponse>>()
+                ?? new List<ProductoDtoResponse>();
+            }
+        }
+        catch(Exception ex)
+        {
+            ToastService.ShowError(ex.Message);
         }
     }
 
