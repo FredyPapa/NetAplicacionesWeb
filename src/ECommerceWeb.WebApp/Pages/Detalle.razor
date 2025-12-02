@@ -1,0 +1,48 @@
+﻿@page "/detalle/{Id:int}"
+
+@using ECommerceWeb.Common
+@using ECommerceWeb.WebApp.Shared
+@using Microsoft.AspNetCore.Components.Authorization
+
+<div class="container px-4 px-lg-5">
+    @if (Producto is not null)
+    {
+        <div class="row gx-4 align-items-center">
+            <div class="col">
+                @if (string.IsNullOrEmpty(Producto.UrlImagen))
+                {
+                    <img class="card-img-top mb-5 mb-md-0" src="assets/images/sinimagen.jpeg" alt="@Producto.Nombre" />
+                }
+                else
+                {
+                    <img class="card-img-top mb-5 mb-md-0" src="@Producto.UrlImagen" alt="@Producto.Nombre" />
+                }
+            </div>
+            <div class="col">
+                <h1 class="display-5 fw-bolder">@Producto.Nombre</h1>
+                <div class="fs-5 mb-5">
+                    <span>$ @Producto.PrecioUnitario.ToString("N2")</span>
+                </div>
+                <p class="lead">@Producto.Descripcion</p>
+                <div class="d-flex">
+                    <AuthorizeView Roles="@Constantes.RolCliente">
+                        <Authorized>
+                            <input type="number" class="form-control text-center me-3" min="1" style="max-width: 5rem"
+                                @bind="Cantidad" />
+                            <button class="btn btn-outline-dark flex-shrink-0" type="button" @onclick="AgregarAlCarrito">
+                                <i class="bi-cart-fill me-1"></i>
+                                Agregar al carrito
+                            </button>
+                        </Authorized>
+                    </AuthorizeView>
+                    <NavLink class="btn btn-outline-secondary ms-3" href="#">
+                        <i class="bi bi-arrow-left me-1"></i>
+                        Volver a productos
+                    </NavLink>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<LoadingComponent IsLoading="IsLoading" />

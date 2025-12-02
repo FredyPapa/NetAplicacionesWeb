@@ -25,10 +25,10 @@
         var response = await HttpClient.GetAsync($"api/productos/{Id}");
         if (response.IsSuccessStatusCode)
         {
-            var result = await response.Content.ReadFromJsonAsync<ProductoDtoRequest>();
-            if(result is not null)
+            var result = await response.Content.ReadFromJsonAsync<BaseResponse<ProductoDtoRequest>>();
+            if(result is {Data:not null, Success: true})
             {
-                producto = result;
+                producto = result.Data;
             }
         }
     }

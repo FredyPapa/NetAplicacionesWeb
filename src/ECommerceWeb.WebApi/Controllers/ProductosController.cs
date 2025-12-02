@@ -4,6 +4,7 @@ using ECommerceWeb.Common.Request;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ECommerceWeb.WebApi.Services;
+using ECommerceWeb.Common.Response;
 
 namespace ECommerceWeb.WebApi.Controllers
 {
@@ -31,12 +32,32 @@ namespace ECommerceWeb.WebApi.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProducto(int id)
         {
-            var producto = await _repository.GetByIdAsync(id);
-            if (producto == null)
+            var response = new BaseResponse<ProductoDtoRequest>();
+            try
             {
-                return NotFound();
+                var producto = await _repository.GetByIdAsync(id);
+                if (producto == null)
+                {
+                    return NotFound();
+                }
+                response.Data = new ProductoDtoRequest
+                {
+                    Id = producto.Id,
+                    CategoriaId = producto.CategoriaId,
+                    MarcaId = producto.MarcaId,
+                    Nombre = producto.Nombre,
+                    Descripcion = producto.Descripcion,
+                    PrecioUnitario = producto.PrecioUnitario,
+                    UrlImagen = producto.UrlImagen
+                };
+                response.Success = true;
             }
-            return Ok(producto);
+            catch (Exception ex)
+            {
+                response.ErrorMessage = $"Error al obtener el producto {ex.Message}";
+            }
+
+            return Ok(response);
         }
 
         [HttpPost]

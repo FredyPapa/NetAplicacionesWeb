@@ -62,7 +62,14 @@
                     }
                     else
                     {
-                        <img src="@Model.UrlImagen" alt="@Model.Nombre" style="width:400px" />
+                        @if (string.IsNullOrWhiteSpace(Model.UrlImagen))
+                        {
+                            <img src="assets/images/sinimagen.jpeg" alt="@Model.Nombre" style="width:400px" />
+                        }
+                        else
+                        {
+                            <img src="@Model.UrlImagen" alt="@Model.Nombre" style="width:400px" />
+                        }
                     }
                 </div>
                 <div class="card-footer">

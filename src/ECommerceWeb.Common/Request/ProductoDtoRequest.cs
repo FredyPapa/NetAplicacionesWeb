@@ -4,6 +4,7 @@ namespace ECommerceWeb.Common.Request
 {
     public class ProductoDtoRequest
     {
+        public int Id { get; set; }
         public int CategoriaId { get; set; }
         public int MarcaId { get; set; }
         public string Nombre { get; set; } = null!;
