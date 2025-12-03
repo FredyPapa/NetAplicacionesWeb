@@ -3,6 +3,7 @@ using ECommerceWeb.Common;
 using ECommerceWeb.Common.Request;
 using ECommerceWeb.Common.Response;
 using ECommerceWeb.WebApi.DataAccess;
+using ECommerceWeb.WebApi.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -17,12 +18,14 @@ namespace ECommerceWeb.WebApi.Services
         private readonly IConfiguration _configuration;
         private readonly UserManager<ECommerceUserIdentity> _userManager;
         private readonly ILogger<UserService> _logger;
+        private readonly IClienteRepository _clienteRepository;
 
-        public UserService(IConfiguration configuration, UserManager<ECommerceUserIdentity> userManager,ILogger<UserService> logger)
+        public UserService(IConfiguration configuration, UserManager<ECommerceUserIdentity> userManager,ILogger<UserService> logger, IClienteRepository clienteRepository)
         {
             _configuration = configuration;
             _userManager = userManager;
             _logger = logger;
+            _clienteRepository = clienteRepository;
         }
         public async Task<LoginDtoResponse> LoginAsync(LoginDtoRequest request)
         {
@@ -107,6 +110,19 @@ namespace ECommerceWeb.WebApi.Services
                 if (result.Succeeded)
                 {
                     await _userManager.AddToRoleAsync(identity, Constantes.RolCliente);
+
+                    // Creamos el registro para la tabla Cliente
+                    var cliente = new Entities.Cliente
+                    {
+                        Nombres = request.NombreCompleto.Split(" ", StringSplitOptions.RemoveEmptyEntries).First(),
+                        Apellidos = string.Join(" ", request.NombreCompleto.Split(" ",StringSplitOptions.RemoveEmptyEntries).Skip(1)),
+                        Email = request.Email,
+                        FechaNacimiento = request.FechaNacimiento,
+                        TipoClienteId = 1
+                    };
+
+                    await _clienteRepository.AddAsync(cliente);
+
                     response.Success = true;
                 }
                 else

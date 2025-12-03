@@ -20,7 +20,7 @@ namespace ECommerceWeb.WebApi.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetCategorias()
         {
             try

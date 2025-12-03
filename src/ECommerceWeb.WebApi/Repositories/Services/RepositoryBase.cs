@@ -18,10 +18,10 @@ namespace ECommerceWeb.WebApi.Repositories.Services
         {
             return await _context.Set<TEntity>().ToListAsync();
         }
-        public async Task<int> AddAsync(TEntity entity)
+        public virtual async Task<int> AddAsync(TEntity entity)
         {
             await _context.Set<TEntity>().AddAsync(entity);
-            return await _context.SaveChangesAsync();
+            return await _context.SaveChangesAsync();       //Confirma los datos en la BD
         }
 
         public async Task<TEntity?> GetByIdAsync(int id)

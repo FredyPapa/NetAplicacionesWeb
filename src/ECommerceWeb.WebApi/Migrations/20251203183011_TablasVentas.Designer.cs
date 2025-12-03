@@ -4,6 +4,7 @@ using ECommerceWeb.WebApi.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ECommerceWeb.WebApi.Migrations
 {
     [DbContext(typeof(ECommerceDbContext))]
-    partial class ECommerceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251203183011_TablasVentas")]
+    partial class TablasVentas
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -254,18 +257,6 @@ namespace ECommerceWeb.WebApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TipoCliente");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Descripcion = "Persona Natural"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Descripcion = "Persona Jurídica"
-                        });
                 });
 
             modelBuilder.Entity("ECommerceWeb.WebApi.Entities.Venta", b =>
