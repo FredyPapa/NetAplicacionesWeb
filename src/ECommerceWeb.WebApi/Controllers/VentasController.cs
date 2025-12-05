@@ -1,10 +1,12 @@
 ﻿using ECommerceWeb.Common;
 using ECommerceWeb.Common.Request;
 using ECommerceWeb.Common.Response;
+using ECommerceWeb.WebApi.Entities;
 using ECommerceWeb.WebApi.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ECommerceWeb.WebApi.Controllers
 {
@@ -12,13 +14,13 @@ namespace ECommerceWeb.WebApi.Controllers
     [ApiController]
     public class VentasController : ControllerBase
     {
-        private readonly IVentaRepository _ventasRepository;
+        private readonly IVentaRepository _repository;
         private readonly IClienteRepository _clienteRepository;
         private readonly ILogger<VentasController> _logger;
 
-        public VentasController(IVentaRepository ventasRepository, IClienteRepository clienteRepository, ILogger<VentasController> logger)
+        public VentasController(IVentaRepository repository, IClienteRepository clienteRepository, ILogger<VentasController> logger)
         {
-            _ventasRepository = ventasRepository;
+            _repository = repository;
             _clienteRepository = clienteRepository;
             _logger = logger;
         }
@@ -31,11 +33,46 @@ namespace ECommerceWeb.WebApi.Controllers
 
             try
             {
+                //Buscamos el ID del Cliente basado en el correo electrónico del usuario autenticado
+                var email = HttpContext.User.Claims.First(c => c.Type == ClaimTypes.Email).Value;
+                var cliente = await _clienteRepository.BuscarPorEmailAsync(email);
+
+                if(cliente is null)
+                {
+                    response.ErrorMessage = $"El cliente con el correo {email} no existe";
+                    return BadRequest(response);
+                }
+
+                var venta = new Venta
+                {
+                    ClienteId = cliente.Id,
+                    Total = request.Total,
+                    VentaDetalle = request.VentaDetalles.Select(x => new VentaDetalle
+                    {
+                        ProductoId = x.ProductoId,
+                        Cantidad = x.Cantidad,
+                        Precio = x.Precio,
+                        Total = x.Total
+                    }).ToHashSet()
+                };
+
+                await _repository.CrearTransaccionAsync();
+                var ventaId = await _repository.AddAsync(venta);
+
+                await _repository.UpdateAsync();
+                await _repository.ConfirmarTransaccionAsync();
+
+                response.Success = true;
+
+                return Ok(response);
 
             }
             catch (Exception ex)
             {
-
+                response.ErrorMessage = "Error al crear la venta";
+                _logger.LogCritical(ex, "{ErrorMessage} {Message}", response.ErrorMessage, ex.Message);
+                await _repository.ResetearTransaccionAsync();
+                return BadRequest(response);
             }
         }
     }

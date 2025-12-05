@@ -6,9 +6,26 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
+using Serilog.Events;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//Configurar Serilog
+var logger = new LoggerConfiguration()
+    .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information)
+    .WriteTo.File("log-.log",rollingInterval:RollingInterval.Day, restrictedToMinimumLevel: LogEventLevel.Warning)
+    .WriteTo.MSSqlServer(builder.Configuration.GetConnectionString("ECommerceDB"),
+    sinkOptions: new Serilog.Sinks.MSSqlServer.MSSqlServerSinkOptions
+    {
+        TableName = "AppLogs",
+        AutoCreateSqlTable = true
+    },
+    restrictedToMinimumLevel: LogEventLevel.Error)
+    .CreateLogger();
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -18,6 +35,7 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<ECommerceDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("ECommerceDB"));
+    options.EnableSensitiveDataLogging();
 });
 
 //Configuramos ASP.NET Identity
@@ -39,6 +57,8 @@ builder.Services.AddIdentity<ECommerceUserIdentity, IdentityRole>(options =>
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IMarcaRepository, MarcaRepository>();
 builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
+builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
+builder.Services.AddScoped<IVentaRepository, VentaRepository>();
 builder.Services.AddScoped<IFileUploader, FileUploader>();
 builder.Services.AddScoped<IUserService, UserService>();
 

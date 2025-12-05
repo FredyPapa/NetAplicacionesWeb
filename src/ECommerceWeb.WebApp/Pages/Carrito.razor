@@ -1,0 +1,227 @@
+﻿@page "/carrito"
+
+@attribute [Authorize(Roles = Constantes.RolCliente)]
+
+@inject HttpClient HttpClient
+@inject ICarritoProxy CarritoProxy
+@inject IToastService ToastService
+@inject NavigationManager NavigationManager
+@inject SweetAlertService Swal
+
+<PageTitle>Carrito</PageTitle>
+<h1><i class="bi bi-cart me-1"></i>Resumen del carrito</h1>
+
+<div class="row mt-4">
+    <div class="col-sm-8">
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Producto</th>
+                                <th>Precio</th>
+                                <th>Cantidad</th>
+                                <th>Total</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Lista.Any())
+                            {
+                                @foreach (var item in Lista)
+                                {
+                                    <tr>
+                                        <td>@item.ProductoDto.Nombre</td>
+                                        <td>$ @item.Precio.ToString("N2")</td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button class="btn btn-outline-warning"
+                                                        @onclick="() => Disminuir(item.ProductoDto.Id)">
+                                                    <i class="bi bi-dash"></i>
+                                                </button>
+                                                <input type="text" class="form-control text-center" style="width:50px"
+                                                       value="@item.Cantidad" readonly />
+                                                <button class="btn btn-outline-warning"
+                                                        @onclick="() => Aumentar(item.ProductoDto.Id)">
+                                                    <i class="bi bi-plus"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td>$ @item.Total.ToString("N2")</td>
+                                        <td>
+                                            <button class="btn btn-danger" @onclick="() => Eliminar(item.ProductoDto.Id)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center">El carrito está vacío.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="card">
+            <div class="card-body">
+                <EditForm Model="TarjetaDto" OnValidSubmit="ProcesarPago">
+                    <DataAnnotationsValidator />
+
+                    <div class="mb-2">
+                        <label for="numeroTarjeta" class="form-label">Número de Tarjeta</label>
+                        <input type="text" class="form-control" id="numeroTarjeta" @bind="TarjetaDto.Numero"
+                               placeholder="1234 5678 9012 3456" maxlength="19" />
+                        <ValidationMessage For="() => TarjetaDto.Numero" />
+                    </div>
+                    <div class="mb-2">
+                        <label for="nombreTitular" class="form-label">Nombre del Titular</label>
+                        <input type="text" class="form-control" id="nombreTitular" @bind="TarjetaDto.Nombre"
+                               placeholder="Nombre como aparece en la tarjeta" />
+                        <ValidationMessage For="() => TarjetaDto.Nombre" />
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <label for="fechaExpiracion" class="form-label">Fecha de Expiración</label>
+                            <input type="text" class="form-control" id="fechaExpiracion"
+                                   @bind="TarjetaDto.FechaExpiracion" placeholder="MM/AA" maxlength="5" />
+                            <ValidationMessage For="() => TarjetaDto.FechaExpiracion" />
+                        </div>
+                        <div class="col">
+                            <label for="cvv" class="form-label">CVV</label>
+                            <input type="text" class="form-control" id="cvv" @bind="TarjetaDto.CodigoSeguridad"
+                                   placeholder="123" maxlength="4" />
+                            <ValidationMessage For="() => TarjetaDto.CodigoSeguridad" />
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total a Pagar:</strong>
+                        <span class="fs-5">$ @Lista.Sum(x => x.Total).ToString("N2")</span>
+                    </div>
+                    <div class="d-grid gap-2 mt-4">
+                        <button class="btn btn-primary float-end" type="submit">
+                            <i class="bi bi-credit-card me-2"></i>Procesar Pago
+                        </button>
+                    </div>
+
+                    <ValidationSummary />
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+<LoadingComponent IsLoading="IsLoading"/>
+
+@code {
+    private bool IsLoading { get; set; }
+    private TarjetaDto TarjetaDto { get; set; } = new();
+    private ICollection<CarritoDto> Lista { get; set; } = new List<CarritoDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Lista = await CarritoProxy.ObtenerCarrito();
+    }
+
+    private void Disminuir(int id)
+    {
+        var item = Lista.First(x => x.ProductoDto.Id == id);
+        if(item.Cantidad -1 > 0)
+        {
+            item.Cantidad--;
+            item.Total = item.Cantidad * item.Precio;
+        }
+    }
+
+    private void Aumentar(int id)
+    {
+        var item = Lista.First(x => x.ProductoDto.Id == id);
+        item.Cantidad++;
+        item.Total = item.Cantidad * item.Precio;
+    }
+
+    private async Task Eliminar(int id)
+    {
+        var result = await Swal.FireAsync(new SweetAlertOptions
+        {
+            Title = "Eliminar Producto",
+            Text = "¿Estás seguro que deseas eliminar este producto del carrito?",
+            Icon = SweetAlertIcon.Warning,
+            ShowCancelButton = true,
+            ConfirmButtonText = "Sí, eliminar",
+            CancelButtonText = "Cancelar"
+        });
+
+        if (!result.IsConfirmed)
+        {
+            return;
+        }
+
+        var item = Lista.First(x => x.ProductoDto.Id == id);
+        Lista.Remove(item);
+        await CarritoProxy.EliminarCarrito(id);
+    }
+
+    private async Task ProcesarPago()
+    {
+        if (!Lista.Any())
+        {
+            ToastService.ShowWarning("El carrito está vacío");
+            return;
+        }
+
+        try
+        {
+            IsLoading = true;
+
+            var listItems = Lista.Select(item => new VentaDetalleDto
+            {
+                ProductoId = item.ProductoDto.Id,
+                Cantidad = item.Cantidad,
+                Precio = item.Precio,
+                Total = item.Total
+            }).ToHashSet();
+
+            var request = new VentaDtoRequest
+            {
+                Total = Lista.Sum(i => i.Total),
+                VentaDetalles = listItems
+            };
+
+            var response = await HttpClient.PostAsJsonAsync("api/Ventas", request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                ToastService.ShowSuccess("Pago procesado con éxito");
+                await CarritoProxy.LimpiarCarrito();
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                var result = await response.Content.ReadFromJsonAsync<BaseResponse>();
+                if(result is {ErrorMessage: not null })
+                {
+                    ToastService.ShowError(result.ErrorMessage);
+                }
+            }
+        }
+        catch(Exception ex)
+        {
+            ToastService.ShowError(ex.Message);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+}

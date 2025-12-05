@@ -79,7 +79,7 @@ namespace ECommerceWeb.WebApi.Services
             }
             catch(SecurityException secEx)
             {
-                _logger.LogWarning(secEx, "La autenticación falló para el usuario {UserName}", request.UserName);
+                _logger.LogError(secEx, "La autenticación falló para el usuario {UserName}", request.UserName);
                 response.Success = false;
                 response.ErrorMessage = secEx.Message;
             }
