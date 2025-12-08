@@ -8,33 +8,45 @@ namespace ECommerceWeb.WebApp.Pages.Productos
 {
     public partial class ProductoEditComponent
     {
+        [Parameter] public ProductoDtoRequest Request { get; set; } = new();
+
+        [Parameter] public EventCallback OnGrabar { get; set; }
+
+        [Parameter] public string Titulo { get; set; } = string.Empty;
+
         [Parameter]
-        public ProductoDtoRequest Model { get; set; } = new ProductoDtoRequest();
+        public ICollection<CategoriaDtoResponse> Categorias { get; set; } = new List<CategoriaDtoResponse>();
 
         [Parameter]
         public ICollection<MarcaDtoResponse> Marcas { get; set; } = new List<MarcaDtoResponse>();
 
-        [Parameter]
-        public ICollection<CategoriaDto> Categorias { get; set; } = new List<CategoriaDto>();
+        private string TextoBoton { get; set; } = "Crear";
 
-        [Parameter]
-        public EventCallback OnGuardar { get; set; }
+        private void Grabar()
+        {
+            OnGrabar.InvokeAsync();
+        }
+
+        protected override void OnInitialized()
+        {
+            TextoBoton = Request.Id == 0 ? "Crear" : "Actualizar";
+        }
 
         private async Task OnFileUploaded(InputFileChangeEventArgs e)
         {
             try
             {
-                var archivo = e.File;
-                var buffer = new byte[archivo.Size];
-                var _ = await archivo.OpenReadStream().ReadAsync(buffer);
+                var imagen = e.File;
+                var buffer = new byte[imagen.Size];
+                var _ = await imagen.OpenReadStream().ReadAsync(buffer); // Extrae el base64
 
-                Model.Base64Imagen = Convert.ToBase64String(buffer);
-                Model.NombreArchivo = archivo.Name;
-                Model.UrlImagen = null!;
+                Request.Base64Imagen = Convert.ToBase64String(buffer);
+                Request.NombreArchivo = imagen.Name;
+                Request.UrlImagen = null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                ToastService.ShowError(ex.Message);
             }
         }
     }

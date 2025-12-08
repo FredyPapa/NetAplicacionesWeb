@@ -22,11 +22,36 @@ namespace ECommerceWeb.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetProductos()
+        public async Task<IActionResult> GetProductos(string? filtro)
         {
-            //var productos = await _repository.ListAsync();
-            var productos = await _repository.GetAllProductsAsync();
-            return Ok(productos);
+            var response = new BaseResponse<ICollection<ProductoDtoResponse>>();
+
+            try
+            {
+
+                var list = await _repository.ListAsync(
+                    predicate: p => p.Nombre.Contains(filtro ?? string.Empty),
+                    selector: p => new ProductoDtoResponse
+                    {
+                        Id = p.Id,
+                        Categoria = p.Categoria.Nombre,
+                        Marca = p.Marca.Nombre,
+                        Descripcion = p.Descripcion,
+                        Nombre = p.Nombre,
+                        PrecioUnitario = p.PrecioUnitario,
+                        UrlImagen = p.UrlImagen
+                    });
+
+                response.Data = list;
+                response.Success = true;
+
+            }
+            catch (Exception ex)
+            {
+                response.ErrorMessage = $"Error al obtener los productos {ex.Message}";
+            }
+
+            return Ok(response);
         }
 
         [HttpGet("{id}")]
@@ -40,6 +65,7 @@ namespace ECommerceWeb.WebApi.Controllers
                 {
                     return NotFound();
                 }
+
                 response.Data = new ProductoDtoRequest
                 {
                     Id = producto.Id,
@@ -80,7 +106,7 @@ namespace ECommerceWeb.WebApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateProducto(int id, [FromBody] ProductoDtoRequest request)
+        public async Task<IActionResult> UpdateProducto(int id, [FromBody] ProductoDtoRequest request)
         {
             var producto = await _repository.GetByIdAsync(id);
             if (producto == null)
@@ -105,7 +131,7 @@ namespace ECommerceWeb.WebApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteProducto(int id)
+        public async Task<IActionResult> DeleteProducto(int id)
         {
             var producto = await _repository.GetByIdAsync(id);
             if (producto == null)

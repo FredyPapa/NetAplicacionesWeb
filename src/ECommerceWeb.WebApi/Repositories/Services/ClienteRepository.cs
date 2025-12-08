@@ -2,6 +2,7 @@
 using ECommerceWeb.WebApi.Entities;
 using ECommerceWeb.WebApi.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace ECommerceWeb.WebApi.Repositories.Services
 {
@@ -15,6 +16,15 @@ namespace ECommerceWeb.WebApi.Repositories.Services
         {
             return await _context.Set<Cliente>()
                 .FirstOrDefaultAsync(p => p.Email == email);
+        }
+
+        public async Task<ICollection<Cliente>> ListarConTipoClienteAsync(Expression<Func<Cliente, bool>> predicate)
+        {
+            return await _context.Set<Cliente>()
+                .Include(c => c.TipoCliente)
+                .Where(predicate)
+                .AsNoTracking()
+                .ToListAsync();
         }
     }
 }

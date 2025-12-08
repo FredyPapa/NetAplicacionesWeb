@@ -80,6 +80,7 @@ builder.Services.AddAuthentication(x =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
     };
     //  Diagnóstico de autenticación
+    /*
     x.Events = new JwtBearerEvents
     {
         OnAuthenticationFailed = context =>
@@ -98,6 +99,7 @@ builder.Services.AddAuthentication(x =>
             return Task.CompletedTask;
         }
     };
+    */
 });
 
 var app = builder.Build();
@@ -116,16 +118,18 @@ app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapFallbackToFile("index.html");
 
 app.MapControllers();
+app.MapFallbackToFile("index.html");
 
+/*
 //Minimal API
 app.MapGet("/api/marcas",async(IMarcaRepository marcaRepository) =>
 {
     var marcas = await marcaRepository.ListAsync();
     return Results.Ok(marcas);
 });
+*/
 
 using (var scope = app.Services.CreateAsyncScope())
 {

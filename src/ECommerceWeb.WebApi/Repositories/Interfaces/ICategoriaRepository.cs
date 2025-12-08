@@ -1,4 +1,5 @@
-﻿using ECommerceWeb.WebApi.Entities;
+﻿using System;
+using ECommerceWeb.WebApi.Entities;
 
 namespace ECommerceWeb.WebApi.Repositories.Interfaces
 {

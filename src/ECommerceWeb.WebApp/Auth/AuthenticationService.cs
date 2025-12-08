@@ -61,6 +61,8 @@ namespace ECommerceWeb.WebApp.Auth
                 return await Task.FromResult(new AuthenticationState(_anonimo));
             }
 
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sesionUsuario.Token);
+
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(ParseToken(sesionUsuario).Claims, "JWT"));
 
             return await Task.FromResult(new AuthenticationState(claimsPrincipal));

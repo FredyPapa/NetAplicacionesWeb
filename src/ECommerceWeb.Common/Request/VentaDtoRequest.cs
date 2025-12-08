@@ -9,6 +9,7 @@ namespace ECommerceWeb.Common.Request
     public class VentaDtoRequest
     {
         public float Total { get; set; }
+
         public HashSet<VentaDetalleDto> VentaDetalles { get; set; } = new();
     }
 

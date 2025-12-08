@@ -1,4 +1,6 @@
-﻿using ECommerceWeb.WebApi.DataAccess;
+﻿using ECommerceWeb.Common.Request;
+using ECommerceWeb.Common.Response;
+using ECommerceWeb.WebApi.DataAccess;
 using ECommerceWeb.WebApi.Entities;
 using ECommerceWeb.WebApi.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -20,27 +22,44 @@ namespace ECommerceWeb.WebApi.Controllers
         }
 
         [HttpGet]
-        //[Authorize]
-        public async Task<IActionResult> GetCategorias()
+        public async Task<IActionResult> GetCategorias(string? filtro)
         {
+            var response = new BaseResponse<ICollection<CategoriaDtoResponse>>();
+
             try
             {
-                var categorias = await _repository.ListAsync();
-                return Ok(categorias);
+                var lista = await _repository.ListAsync(p => p.Nombre
+                                    .Contains(filtro ?? string.Empty));
+
+                response.Data = lista.Select(c => new CategoriaDtoResponse
+                {
+                    Id = c.Id,
+                    Nombre = c.Nombre,
+                    Descripcion = c.Descripcion
+                }).ToList();
+
+                response.Success = true;
             }
             catch (Exception ex)
             {
-                return BadRequest(new { Message = "No se pudo listar los registros", Error = ex.Message });
+                response.ErrorMessage = ex.Message;
             }
+
+            return Ok(response);
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateCategoria([FromBody] Categoria categoria)
+        public async Task<IActionResult> CreateCategoria([FromBody] CategoriaDtoRequest categoria)
         {
             try
             {
-                await _repository.AddAsync(categoria);
-                return CreatedAtAction(nameof(GetCategorias), new { id = categoria.Id }, categoria);
+                var entity = new Categoria
+                {
+                    Nombre = categoria.Nombre,
+                    Descripcion = categoria.Descripcion
+                };
+                await _repository.AddAsync(entity);
+                return CreatedAtAction(nameof(GetCategorias), new { id = entity.Id }, entity);
             }
             catch (Exception ex)
             {
@@ -54,7 +73,7 @@ namespace ECommerceWeb.WebApi.Controllers
             try
             {
                 var categoria = await _repository.GetByIdAsync(id);
-                if(categoria == null)
+                if (categoria == null)
                 {
                     return NotFound();
                 }
@@ -62,12 +81,12 @@ namespace ECommerceWeb.WebApi.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new {Message = "No se pudo obtener el registro", Error = ex.Message});
+                return BadRequest(new { Message = "No se pudo obtener el registro", Error = ex.Message });
             }
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateCategoria(int id, [FromBody] Categoria categoria)
+        public async Task<IActionResult> UpdateCategoria(int id, [FromBody] CategoriaDtoRequest categoria)
         {
             try
             {
@@ -76,6 +95,7 @@ namespace ECommerceWeb.WebApi.Controllers
                 {
                     return NotFound();
                 }
+
                 existingCategoria.Nombre = categoria.Nombre;
                 existingCategoria.Descripcion = categoria.Descripcion;
 

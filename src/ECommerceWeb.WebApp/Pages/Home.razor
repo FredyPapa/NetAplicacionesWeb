@@ -2,28 +2,26 @@
 @page "/home"
 @using ECommerceWeb.WebApp.Shared
 
-<PageTitle>Tienda Virtual</PageTitle>
+<PageTitle>Inicio</PageTitle>
 
 <h1>Escoge tu mejor opción</h1>
-
 <div>
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="input-group mb-3">
-                <input type="text" class="form-control" placeholder="Buscar productos..." aria-label="Buscar productos..." aria-describedby="button-search" @bind="SearchTerm" />
-                <button class="btn btn-primary" type="button" id="button-search" @onclick="SearchProducts">
-                    <i class="bi bi-search"></i>
-                </button>
+                <input type="text" class="form-control" placeholder="Buscar productos..." @bind="Buscar" />
+                <button class="btn btn-primary" @onclick="ObtenerCatalogo"><i
+                        class="bi bi-search me-1"></i>Buscar</button>
             </div>
         </div>
     </div>
 </div>
 
-@if(Productos is not null)
+@if (Productos is not null)
 {
     <div class="container mb-5 gap-5">
-        <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center">
-            @foreach(var producto in Productos)
+        <div class="row gx-4 row-cols-1 row-cols-md-3 row-cols-xl-5 justify-content-center">
+            @foreach (var producto in Productos)
             {
                 <ProductCard Producto="producto" OnClick="VerDetalle" />
             }

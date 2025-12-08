@@ -13,7 +13,7 @@
         public DateTime FechaCreacion { get; set; }
 
         //Esto no forma parte de la tabla en sí, sólo sirve para la migración
-        public HashSet<VentaDetalle> VentaDetalle { get; set; } = new();
+        public HashSet<VentaDetalle> VentaDetalles { get; set; } = new();
     }
 
 }

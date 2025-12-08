@@ -2,6 +2,7 @@
 using ECommerceWeb.WebApi.Entities;
 using ECommerceWeb.WebApi.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace ECommerceWeb.WebApi.Repositories.Services
 {
@@ -18,10 +19,30 @@ namespace ECommerceWeb.WebApi.Repositories.Services
         {
             return await _context.Set<TEntity>().ToListAsync();
         }
+
+        public virtual async Task<ICollection<TEntity>> ListAsync(Expression<Func<TEntity, bool>> predicate)
+        {
+            return await _context.Set<TEntity>()
+                .AsNoTracking()
+                .Where(predicate)
+                .ToListAsync();
+        }
+
+        public virtual async Task<ICollection<TInfo>> ListAsync<TInfo>(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, TInfo>> selector)
+        {
+            var query = _context.Set<TEntity>()
+                .Where(predicate)
+                .AsNoTracking()
+                .Select(selector)
+                .AsQueryable();
+
+            return await query.ToListAsync();
+        }
+
         public virtual async Task<int> AddAsync(TEntity entity)
         {
             await _context.Set<TEntity>().AddAsync(entity);
-            return await _context.SaveChangesAsync();       //Confirma los datos en la BD
+            return await _context.SaveChangesAsync(); // Confirma los datos en la BD
         }
 
         public async Task<TEntity?> GetByIdAsync(int id)

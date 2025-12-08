@@ -1,92 +1,168 @@
-﻿@using ECommerceWeb.Common
-@using ECommerceWeb.Common.Response
+﻿﻿@using Blazored.Toast.Services
+@using ECommerceWeb.Common
 @using ECommerceWeb.Common.Request
+@using ECommerceWeb.Common.Response
 
-@inject HttpClient HttpClient
+@inject IToastService ToastService
 
-<EditForm Model="Model" OnSubmit="OnGuardar">
-    <DataAnnotationsValidator />
-
-    <div class="row">
-        <div class="col-6">
-
-            <div class="mb-3">
-                <label for="nombre" class="form-label">Nombre</label>
-                <InputText id="nombre" class="form-control" @bind-Value="Model.Nombre" />
-                <ValidationMessage For="@(() => Model.Nombre)" />
-            </div>
-
-            <div class="mb-3">
-                <label for="descripcion" class="form-label">Descripción</label>
-                <InputTextArea id="descripcion" class="form-control" @bind-Value="Model.Descripcion" />
-                <ValidationMessage For="@(() => Model.Descripcion)" />
-            </div>
-
-            <div class="mb-3">
-                <label for="precioUnitario" class="form-label">Precio Unitario</label>
-                <InputNumber id="precioUnitario" class="form-control" @bind-Value="Model.PrecioUnitario" />
-                <ValidationMessage For="@(() => Model.PrecioUnitario)" />
-            </div>
-
-            <div class="mb-3">
-                <label for="marca" class="form-label">Marca</label>
-                <InputSelect id="marca" class="form-select" @bind-Value="Model.MarcaId">
-                    <option value="0">Seleccione una marca</option>
-                    @foreach (var marca in Marcas)
-                    {
-                        <option value="@marca.Id">@marca.Nombre</option>
-                    }
-                </InputSelect>
-            </div>
-
-            <div class="mb-3">
-                <label for="categoria" class="form-label">Categoría</label>
-                <InputSelect id="categoria" class="form-select" @bind-Value="Model.CategoriaId">
-                    <option value="0">Seleccione una categoría</option>
-                    @foreach (var categoria in Categorias)
-                    {
-                        <option value="@categoria.Id">@categoria.Nombre</option>
-                    }
-                </InputSelect>
-            </div>
+<div class="container-fluid py-4">
+    <!-- Header de la página -->
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="h3 text-primary mb-0">
+                <i class="bi bi-box me-2"></i>@Titulo
+            </h2>
+            <p class="text-muted mb-0">Completa la información del producto</p>
         </div>
+    </div>
 
-        <div class="col-6">
-            <div class="card">
-                <div class="card-body">
-                    @if (Model.Base64Imagen is not null)
-                    {
-                        <div style="margin:10px">
-                            <img src="data:image/jpeg;base64, @Model.Base64Imagen" alt="@Model.Nombre" style="width:400px" />
+    <EditForm Model="Request" OnValidSubmit="Grabar">
+        <DataAnnotationsValidator />
+
+        <div class="row g-4">
+            <!-- Formulario de datos -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0 text-secondary">
+                            <i class="bi bi-info-circle me-2"></i>Información del Producto
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="nombre">
+                                    <i class="bi bi-tag me-1"></i>Nombre del Producto
+                                </label>
+                                <input type="text" id="nombre" class="form-control"
+                                       @bind-value="Request.Nombre" placeholder="Ej: Laptop HP Pavilion" />
+                                <ValidationMessage For="() => Request.Nombre" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="precio">
+                                    <i class="bi bi-currency-dollar me-1"></i>Precio Unitario
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light">$</span>
+                                    <input type="number" id="precio" class="form-control"
+                                           @bind-value="Request.PrecioUnitario" step="0.01" min="1" max="9999"
+                                           placeholder="0.00" />
+                                </div>
+                                <ValidationMessage For="() => Request.PrecioUnitario" />
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-semibold" for="descripcion">
+                                    <i class="bi bi-card-text me-1"></i>Descripción
+                                </label>
+                                <textarea id="descripcion" class="form-control" rows="3"
+                                          @bind="Request.Descripcion"
+                                          placeholder="Describe las características del producto..."></textarea>
+                                <ValidationMessage For="() => Request.Descripcion" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="categoria">
+                                    <i class="bi bi-tags me-1"></i>Categoría
+                                </label>
+                                <InputSelect id="categoria" class="form-select" @bind-Value="Request.CategoriaId">
+                                    <option value="0">-- Seleccione una categoría --</option>
+                                    @foreach (var item in Categorias)
+                                    {
+                                        <option value="@item.Id">@item.Nombre</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="() => Request.CategoriaId" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="marca">
+                                    <i class="bi bi-award me-1"></i>Marca
+                                </label>
+                                <InputSelect id="marca" class="form-select" @bind-Value="Request.MarcaId">
+                                    <option value="0">-- Seleccione una marca --</option>
+                                    @foreach (var item in Marcas)
+                                    {
+                                        <option value="@item.Id">@item.Nombre</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="() => Request.MarcaId" />
+                            </div>
                         </div>
-                    }
-                    else
-                    {
-                        @if (string.IsNullOrWhiteSpace(Model.UrlImagen))
-                        {
-                            <img src="assets/images/sinimagen.jpeg" alt="@Model.Nombre" style="width:400px" />
-                        }
-                        else
-                        {
-                            <img src="@Model.UrlImagen" alt="@Model.Nombre" style="width:400px" />
-                        }
-                    }
+                    </div>
                 </div>
-                <div class="card-footer">
-                    <InputFile accpet="image/jpeg, image/png, image/webp" style="display:none" id="file" OnChange="OnFileUploaded" />
-                    <label for="file" class="btn btn-secondary"><i class="bi bi-camera me-1"></i>Imagen</label>
+            </div>
+
+            <!-- Panel de imagen -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0 text-secondary">
+                            <i class="bi bi-image me-2"></i>Imagen del Producto
+                        </h5>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <div class="text-center mb-3">
+                            @if (Request.Base64Imagen is not null)
+                            {
+                                <div class="border rounded p-2 bg-light">
+                                    <img src="data:image/png;base64,@Request.Base64Imagen"
+                                         alt="@Request.Nombre" class="img-fluid rounded"
+                                         style="max-height: 300px; object-fit: contain;" />
+                                </div>
+                            }
+                            else if (!string.IsNullOrEmpty(Request.UrlImagen))
+                            {
+                                <div class="border rounded p-2 bg-light">
+                                    <img src="@Request.UrlImagen" alt="@Request.Nombre"
+                                         class="img-fluid rounded"
+                                         style="max-height: 300px; object-fit: contain;" />
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="border rounded p-4 bg-light d-flex align-items-center justify-content-center"
+                                     style="height: 200px;">
+                                    <div class="text-center text-muted">
+                                        <i class="bi bi-image display-4"></i>
+                                        <p class="mt-2 mb-0">Sin imagen</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="mt-auto">
+                            <InputFile accept="image/png, image/jpeg, image/webp" style="display: none"
+                                       id="file" OnChange="OnFileUploaded" />
+                            <label for="file" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-camera me-2"></i>Cambiar Imagen
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="row">
-        <div class="d-flex gap-1 align-items-baseline">
-            <button type="submit" class="btn btn-primary"><i class="bi bi-floppy me-1"></i>Guardar</button>
-            <a href="productos/list" class="btn btn-secondary mt-1"><i class="bi bi-arrow-left me-1"></i>Volver al listado</a>
+        <!-- Barra de acciones -->
+        <div class="row mt-4">
+            <div class="col">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex gap-3 justify-content-end">
+                            <button type="reset" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Limpiar
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-2"></i>Guardar Producto
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <ValidationSummary />
-</EditForm>
+        <ValidationSummary />
+    </EditForm>
+</div>
 

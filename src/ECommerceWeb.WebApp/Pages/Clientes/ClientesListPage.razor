@@ -1,25 +1,25 @@
-﻿﻿﻿@using Blazored.Toast.Services
+﻿@using Blazored.Toast.Services
 @using CurrieTechnologies.Razor.SweetAlert2
 @using ECommerceWeb.Common
 @using System.Threading.Tasks
 @using ECommerceWeb.WebApp.Shared
-@page "/categorias/list"
+@page "/clientes/list"
 @inject HttpClient HttpClient
 @inject SweetAlertService Swal
 @inject NavigationManager NavigationManager
 @inject IToastService ToastService
 @attribute [Authorize]
 
-<PageTitle>Categorías</PageTitle>
+<PageTitle>Clientes</PageTitle>
 
 <div class="container-fluid py-4">
     <!-- Header de la página -->
     <div class="row mb-4">
         <div class="col">
             <h1 class="h2 text-primary mb-0">
-                <i class="bi bi-tags me-2"></i>Gestión de Categorías
+                <i class="bi bi-people me-2"></i>Gestión de Clientes
             </h1>
-            <p class="text-muted mb-0">Administra las categorías de productos de tu tienda</p>
+            <p class="text-muted mb-0">Consulta los clientes registrados en tu tienda</p>
         </div>
     </div>
 
@@ -27,32 +27,27 @@
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <div class="row g-3 align-items-end">
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label for="filtro" class="form-label fw-semibold">
-                        <i class="bi bi-search me-1"></i>Filtrar categorías
+                        <i class="bi bi-search me-1"></i>Filtrar clientes
                     </label>
                     <div class="input-group">
                         <span class="input-group-text bg-light">
                             <i class="bi bi-funnel"></i>
                         </span>
                         <input id="filtro" type="text" class="form-control"
-                               @bind="Filtro" placeholder="Buscar por nombre o descripción..." />
+                               @bind="Filtro" placeholder="Buscar por nombre o apellido..." />
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <button type="button" class="btn btn-outline-primary w-100" @onclick="CargarDatos">
                         <i class="bi bi-arrow-clockwise me-2"></i>Actualizar
                     </button>
                 </div>
-                <div class="col-md-3">
-                    <a class="btn btn-success w-100" href="categorias/new">
-                        <i class="bi bi-plus-circle me-2"></i>Nueva Categoría
-                    </a>
-                </div>
                 <div class="col-md-2">
                     <div class="d-flex justify-content-end">
                         <span class="badge bg-primary fs-6 px-3 py-2">
-                            <i class="bi bi-collection me-1"></i>@(Categorias?.Count ?? 0)
+                            <i class="bi bi-collection me-1"></i>@(Clientes?.Count ?? 0)
                         </span>
                     </div>
                 </div>
@@ -60,25 +55,22 @@
         </div>
     </div>
 
-    <!-- Tabla de categorías -->
-    @if (Categorias == null)
+    <!-- Tabla de clientes -->
+    @if (Clientes == null)
     {
         <div class="text-center py-5">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Cargando...</span>
             </div>
-            <p class="mt-3 text-muted">Cargando categorías...</p>
+            <p class="mt-3 text-muted">Cargando clientes...</p>
         </div>
     }
-    else if (!Categorias.Any())
+    else if (!Clientes.Any())
     {
         <div class="text-center py-5">
             <i class="bi bi-inbox display-1 text-muted"></i>
-            <h4 class="text-muted mt-3">No hay categorías</h4>
-            <p class="text-muted">Comienza creando tu primera categoría de productos</p>
-            <a href="categorias/new" class="btn btn-primary">
-                <i class="bi bi-plus-circle me-2"></i>Crear Categoría
-            </a>
+            <h4 class="text-muted mt-3">No hay clientes</h4>
+            <p class="text-muted">No se encontraron clientes en el sistema</p>
         </div>
     }
     else
@@ -86,7 +78,7 @@
         <div class="card shadow-sm">
             <div class="card-header bg-light">
                 <h5 class="mb-0 text-secondary">
-                    <i class="bi bi-list-ul me-2"></i>Lista de Categorías
+                    <i class="bi bi-list-ul me-2"></i>Lista de Clientes
                 </h5>
             </div>
             <div class="table-responsive">
@@ -97,40 +89,37 @@
                                 <i class="bi bi-hash me-1"></i>ID
                             </th>
                             <th class="border-0">
-                                <i class="bi bi-tag me-1"></i>Nombre
+                                <i class="bi bi-person me-1"></i>Nombre Completo
                             </th>
                             <th class="border-0">
-                                <i class="bi bi-card-text me-1"></i>Descripción
+                                <i class="bi bi-envelope me-1"></i>Email
                             </th>
-                            <th class="border-0 text-center">
-                                <i class="bi bi-gear me-1"></i>Acciones
+                            <th class="border-0">
+                                <i class="bi bi-calendar me-1"></i>Fecha Nacimiento
+                            </th>
+                            <th class="border-0">
+                                <i class="bi bi-star me-1"></i>Tipo Cliente
                             </th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Categorias)
+                        @foreach (var item in Clientes)
                         {
                             <tr class="align-middle">
                                 <td>
                                     <span class="badge bg-secondary fs-6">@item.Id</span>
                                 </td>
                                 <td>
-                                    <span class="fw-semibold text-dark">@item.Nombre</span>
+                                    <span class="fw-semibold text-dark">@item.NombreCompleto</span>
                                 </td>
                                 <td>
-                                    <span class="text-muted">@(string.IsNullOrEmpty(item.Descripcion) ? "Sin descripción" : item.Descripcion)</span>
+                                    <span class="text-muted">@item.Email</span>
                                 </td>
-                                <td class="text-center">
-                                    <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-outline-primary btn-sm"
-                                                @onclick="() => Editar(item.Id)" title="Editar">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-outline-danger btn-sm"
-                                                @onclick="() => Eliminar(item.Id)" title="Eliminar">
-                                            <i class="bi bi-trash3"></i>
-                                        </button>
-                                    </div>
+                                <td>
+                                    <span class="text-muted">@item.FechaNacimiento.ToString("dd/MM/yyyy")</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info text-dark">@item.TipoClienteDescripcion</span>
                                 </td>
                             </tr>
                         }
@@ -142,3 +131,5 @@
 </div>
 
 <LoadingComponent IsLoading="IsLoading" />
+
+

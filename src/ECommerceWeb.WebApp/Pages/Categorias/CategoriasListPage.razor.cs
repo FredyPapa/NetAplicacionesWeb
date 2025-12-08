@@ -1,56 +1,78 @@
+using System.Net.Http.Json;
 using CurrieTechnologies.Razor.SweetAlert2;
 using ECommerceWeb.Common;
-using System.Net.Http.Json;
+using ECommerceWeb.Common.Response;
 
 namespace ECommerceWeb.WebApp.Pages.Categorias
 {
     public partial class CategoriasListPage
     {
-        public ICollection<CategoriaDto> Categorias { get; set; } = new List<CategoriaDto>();
+        public ICollection<CategoriaDtoResponse> Categorias { get; set; } = new List<CategoriaDtoResponse>();
+        public bool IsLoading { get; set; }
+        public string? Filtro { get; set; }
 
-        protected override async Task OnInitializedAsync()
-        {
-            await LoadData();
-        }
-
-        private async Task LoadData()
+        private async Task CargarDatos()
         {
             try
             {
-                //var HttpResponseMessage? response = await HttpClient.GetAsync("api/categorias");
-                var response = await HttpClient.GetAsync("api/categorias");
-                if (response.IsSuccessStatusCode)
+                IsLoading = true;
+                var response =
+                  await HttpClient.GetFromJsonAsync<BaseResponse<ICollection<CategoriaDtoResponse>>>
+                      ($"api/Categorias?filtro={Filtro}");
+
+                // Pattern Matching
+                if (response is { Data: not null, Success: true })
                 {
-                    Categorias = await response.Content.ReadFromJsonAsync<ICollection<CategoriaDto>>()
-                    ?? new List<CategoriaDto>();
+                    Categorias = response.Data;
+                }
+                else if (response is { ErrorMessage: not null })
+                {
+                    ToastService.ShowError(response.ErrorMessage);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                ToastService.ShowError(ex.Message);
+                ToastService.ShowError($"Ocurrió un error: {ex.Message}");
             }
+            finally
+            {
+                IsLoading = false;
+            }
+
         }
 
-        private async Task DeleteCategoria(int id)
+        protected override async Task OnInitializedAsync()
         {
-            var swalResult = await Swal.FireAsync(new SweetAlertOptions
+            await CargarDatos();
+        }
+
+        private void Editar(int id)
+        {
+            NavigationManager.NavigateTo($"categorias/edit/{id}");
+        }
+
+        private async Task Eliminar(int id)
+        {
+            var result = await Swal.FireAsync(new SweetAlertOptions("Eliminar")
             {
-                Title = "¿Estás seguro?",
-                Text = "Esta acción no se puede deshacer",
-                Icon = SweetAlertIcon.Warning,
-                ShowCancelButton = true,
-                ConfirmButtonText = "Sí, eliminar",
-                CancelButtonText = "Cancelar"
+                Text = "¿Desea eliminar el registro?",
+                Icon = SweetAlertIcon.Question,
+                ConfirmButtonText = "Sí",
+                CancelButtonText = "No",
+                ShowCancelButton = true
             });
 
-            if (!swalResult.IsConfirmed)
+            if (!result.IsConfirmed)
                 return;
 
-            var response = await HttpClient.DeleteAsync($"api/categorias/{id}");
-            if (response.IsSuccessStatusCode)
+            var response = await HttpClient.DeleteFromJsonAsync<BaseResponse>($"api/Categorias/{id}");
+            if (response is { Success: true })
             {
-                //Refrescar la lista luego de eliminar
-                await LoadData();
+                await CargarDatos();
+            }
+            else
+            {
+                ToastService.ShowError("No se pudo eliminar el registro");
             }
         }
     }

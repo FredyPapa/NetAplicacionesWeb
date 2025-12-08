@@ -1,7 +1,7 @@
-﻿using Blazored.Toast.Services;
+﻿using System.Net.Http.Json;
+using Blazored.Toast.Services;
 using ECommerceWeb.Common.Response;
 using Microsoft.AspNetCore.Components;
-using System.Net.Http.Json;
 
 namespace ECommerceWeb.WebApp.Pages
 {
@@ -11,30 +11,38 @@ namespace ECommerceWeb.WebApp.Pages
         private readonly HttpClient _httpClient;
         private readonly NavigationManager _navigationManager;
 
-        public Home(IToastService toastService,HttpClient httpClient, NavigationManager navigation)
+        public Home(IToastService toastService, HttpClient httpClient, NavigationManager navigationManager)
         {
             _toastService = toastService;
             _httpClient = httpClient;
-            _navigationManager = navigation;
+            _navigationManager = navigationManager;
         }
 
-        public string SearchTerm { get; set; } = null!;
+        private ICollection<ProductoDtoResponse>? Productos { get; set; }
+        private ICollection<CategoriaDtoResponse>? Categorias { get; set; }
 
-        public ICollection<ProductoDtoResponse>? Productos { get; set; }
+        private string Buscar { get; set; } = string.Empty;
 
-        public bool IsLoading { get; set; }
+        private bool IsLoading { get; set; }
 
 
-        private async Task SearchProducts()
+        private async Task ObtenerCatalogo()
         {
+
             try
             {
                 IsLoading = true;
-                //
-                var response = await _httpClient.GetAsync($"api/Productos");
-                if (response.IsSuccessStatusCode)
+                var response = await _httpClient.GetAsync($"api/productos?filtro={Buscar}");
+                response.EnsureSuccessStatusCode();
+
+                var result = await response.Content.ReadFromJsonAsync<BaseResponse<ICollection<ProductoDtoResponse>>>();
+                if (result is { Success: true, Data: not null })
                 {
-                    Productos = await response.Content.ReadFromJsonAsync<ICollection<ProductoDtoResponse>>() ?? new List<ProductoDtoResponse>();
+                    Productos = result.Data;
+                }
+                else
+                {
+                    _toastService.ShowError(result?.ErrorMessage ?? "Error al obtener los productos");
                 }
             }
             catch (Exception ex)
@@ -49,12 +57,22 @@ namespace ECommerceWeb.WebApp.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            await SearchProducts();
+            await ObtenerCatalogo();
+
+            var response = await _httpClient.GetFromJsonAsync<BaseResponse<ICollection<CategoriaDtoResponse>>>("api/categorias");
+            if (response is { Success: true, Data: not null })
+            {
+                Categorias = response.Data;
+            }
+            else
+            {
+                _toastService.ShowError(response?.ErrorMessage ?? "Error al obtener las categorías");
+            }
         }
 
-        private void VerDetalle(int idProducto)
+        private void VerDetalle(int id)
         {
-            _navigationManager.NavigateTo($"/detalle/{idProducto}");
+            _navigationManager.NavigateTo($"/detalle/{id}");
         }
     }
 }

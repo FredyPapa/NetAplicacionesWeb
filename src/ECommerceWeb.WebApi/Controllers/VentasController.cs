@@ -1,4 +1,5 @@
-﻿using ECommerceWeb.Common;
+﻿using System.Security.Claims;
+using ECommerceWeb.Common;
 using ECommerceWeb.Common.Request;
 using ECommerceWeb.Common.Response;
 using ECommerceWeb.WebApi.Entities;
@@ -6,7 +7,6 @@ using ECommerceWeb.WebApi.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace ECommerceWeb.WebApi.Controllers
 {
@@ -33,13 +33,13 @@ namespace ECommerceWeb.WebApi.Controllers
 
             try
             {
-                //Buscamos el ID del Cliente basado en el correo electrónico del usuario autenticado
+                // Buscamos el ID del cliente basado en el correo electronico del usuario autenticado
                 var email = HttpContext.User.Claims.First(c => c.Type == ClaimTypes.Email).Value;
                 var cliente = await _clienteRepository.BuscarPorEmailAsync(email);
 
-                if(cliente is null)
+                if (cliente is null)
                 {
-                    response.ErrorMessage = $"El cliente con el correo {email} no existe";
+                    response.ErrorMessage = $"El cliente con el correo {email} no existe!";
                     return BadRequest(response);
                 }
 
@@ -47,7 +47,7 @@ namespace ECommerceWeb.WebApi.Controllers
                 {
                     ClienteId = cliente.Id,
                     Total = request.Total,
-                    VentaDetalle = request.VentaDetalles.Select(x => new VentaDetalle
+                    VentaDetalles = request.VentaDetalles.Select(x => new VentaDetalle
                     {
                         ProductoId = x.ProductoId,
                         Cantidad = x.Cantidad,
@@ -57,7 +57,7 @@ namespace ECommerceWeb.WebApi.Controllers
                 };
 
                 await _repository.CrearTransaccionAsync();
-                var ventaId = await _repository.AddAsync(venta);
+                _ = await _repository.AddAsync(venta);
 
                 await _repository.UpdateAsync();
                 await _repository.ConfirmarTransaccionAsync();
@@ -65,7 +65,6 @@ namespace ECommerceWeb.WebApi.Controllers
                 response.Success = true;
 
                 return Ok(response);
-
             }
             catch (Exception ex)
             {

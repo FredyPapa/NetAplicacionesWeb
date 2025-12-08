@@ -35,7 +35,7 @@ namespace ECommerceWeb.WebApp.Proxy.Services
                 ActualizarVista?.Invoke();
 
                 _toastService.ShowSuccess(producto is not null ? "Producto actualizado en el carrito" : "Producto agregado al carrito");
-            }catch(Exception ex)
+            }catch(Exception)
             {
                 _toastService.ShowError("Nos e pudo agregar el producto al carrito");
             }

@@ -18,12 +18,12 @@ namespace ECommerceWeb.WebApi.Repositories.Services
 
         public async Task ConfirmarTransaccionAsync()
         {
-            await _context.Database.BeginTransactionAsync();
+            await _context.Database.CommitTransactionAsync();
         }
 
         public async Task CrearTransaccionAsync()
         {
-            await _context.Database.CommitTransactionAsync();
+            await _context.Database.BeginTransactionAsync();
         }
 
         public async Task ResetearTransaccionAsync()
