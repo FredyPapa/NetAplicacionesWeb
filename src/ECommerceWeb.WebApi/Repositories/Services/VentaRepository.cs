@@ -1,6 +1,8 @@
 ﻿using ECommerceWeb.WebApi.DataAccess;
 using ECommerceWeb.WebApi.Entities;
+using ECommerceWeb.WebApi.Entities.Infos;
 using ECommerceWeb.WebApi.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace ECommerceWeb.WebApi.Repositories.Services
 {
@@ -30,5 +32,13 @@ namespace ECommerceWeb.WebApi.Repositories.Services
         {
             await _context.Database.RollbackTransactionAsync();
         }
+
+        public async Task<Dashboard> MostrarDashboard()
+        {
+            var entity = _context.Database.SqlQuery<Dashboard>(
+                $"EXEC uspDashboard");
+            return await Task.FromResult(entity.AsEnumerable().First());
+        }
+
     }
 }

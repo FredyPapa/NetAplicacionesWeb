@@ -1,4 +1,5 @@
 ﻿using ECommerceWeb.WebApi.Entities;
+using ECommerceWeb.WebApi.Entities.Infos;
 
 namespace ECommerceWeb.WebApi.Repositories.Interfaces
 {
@@ -7,5 +8,6 @@ namespace ECommerceWeb.WebApi.Repositories.Interfaces
         Task CrearTransaccionAsync();
         Task ConfirmarTransaccionAsync();
         Task ResetearTransaccionAsync();
+        Task<Dashboard> MostrarDashboard();
     }
 }

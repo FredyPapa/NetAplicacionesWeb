@@ -3,6 +3,7 @@ using ECommerceWeb.Common;
 using ECommerceWeb.Common.Request;
 using ECommerceWeb.Common.Response;
 using ECommerceWeb.WebApi.Entities;
+using ECommerceWeb.WebApi.Entities.Infos;
 using ECommerceWeb.WebApi.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -71,6 +72,26 @@ namespace ECommerceWeb.WebApi.Controllers
                 response.ErrorMessage = "Error al crear la venta";
                 _logger.LogCritical(ex, "{ErrorMessage} {Message}", response.ErrorMessage, ex.Message);
                 await _repository.ResetearTransaccionAsync();
+                return BadRequest(response);
+            }
+        }
+
+        [HttpGet("dashboard")]
+        [Authorize(Roles = Constantes.RolAdministrador)]
+        public async Task<IActionResult> Get()
+        {
+            var response = new BaseResponse<Dashboard>();
+            try
+            {
+                var dashboardInfo = await _repository.MostrarDashboard();
+                response.Data = dashboardInfo;
+                response.Success = true;
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                response.ErrorMessage = "Error al obtener la información del dashboard";
+                _logger.LogCritical(ex, "{ErrorMessage} {Message}", response.ErrorMessage, ex.Message);
                 return BadRequest(response);
             }
         }

@@ -133,6 +133,10 @@ app.MapGet("/api/marcas",async(IMarcaRepository marcaRepository) =>
 
 using (var scope = app.Services.CreateAsyncScope())
 {
+    //Ejecutar las migraciones al iniciar la aplicación
+    var dbContext = scope.ServiceProvider.GetRequiredService<ECommerceDbContext>();
+    await dbContext.Database.MigrateAsync();
+
     //Crea el usuario admin por default
     await UserDataSeeder.Seed(scope.ServiceProvider);
 }

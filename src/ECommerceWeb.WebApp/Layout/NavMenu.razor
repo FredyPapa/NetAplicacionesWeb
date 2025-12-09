@@ -32,6 +32,13 @@
                 <li class="nav-item">
                     <NavLink class="nav-link" href="productos/list">Productos</NavLink>
                 </li>
+                <AuthorizeView Roles="@Constantes.RolAdministrador">
+                    <Authorized>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="dashboard">Dashboard</NavLink>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
             </ul>
         </div>
 
